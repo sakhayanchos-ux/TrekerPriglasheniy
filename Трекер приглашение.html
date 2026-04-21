@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Трекер приглашений · Поколения · Сахаяна</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #F3EBD8;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      padding: 20px 16px 40px;
+      color: #1e1e2a;
+      line-height: 1.4;
+    }
+    .container { max-width: 100%; overflow-x: auto; }
+    h1 { font-size: 1.8rem; font-weight: 600; margin-bottom: 8px; color: #5a5e3b; }
+    .subhead { color: #5a5e3b; margin-bottom: 20px; border-left: 4px solid #F297A0; padding-left: 16px; }
+    
+    .date-panel {
+      display: flex; flex-wrap: wrap; gap: 20px; background: #F9D0CE; padding: 12px 18px;
+      border-radius: 20px; margin-bottom: 20px; font-size: 14px; color: #1e293b;
+      border: 1px solid #F297A0;
+    }
+    .date-item { display: flex; align-items: baseline; gap: 8px; }
+    .date-item input { padding: 6px 10px; border: 1px solid #F297A0; border-radius: 12px; background: white; font-size: 13px; }
+    
+    .event-block {
+      background: white; border-radius: 24px; padding: 16px 12px; margin-bottom: 24px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.05); border: 2px solid #F9D0CE;
+    }
+    .event-title {
+      font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; color: #5a5e3b;
+      border-bottom: 3px solid #F297A0; padding-bottom: 8px; display: flex; align-items: center; gap: 10px;
+    }
+    .copy-btn {
+      background: #B6BB79; color: white; border: none; padding: 4px 12px; border-radius: 30px;
+      font-size: 0.7rem; font-weight: 600; cursor: pointer; margin-left: 10px;
+    }
+    
+    .generation-block {
+      margin-bottom: 24px;
+      background: #FDFBF7; 
+      border-radius: 20px;
+      padding: 12px;
+    }
+    .generation-title {
+      font-size: 1.2rem; font-weight: 700; margin-bottom: 10px; color: #5a5e3b;
+      background: #F9D0CE; display: inline-block; padding: 6px 20px; border-radius: 30px;
+    }
+    .count-badge {
+      background: #F297A0; color: white; padding: 2px 10px; border-radius: 20px;
+      font-size: 0.9rem; margin-left: 8px;
+    }
+    
+    .table-wrapper { overflow-x: auto; margin-bottom: 10px; border-radius: 16px; }
+    table { width: 100%; border-collapse: collapse; min-width: 900px; font-size: 0.8rem; background: white; }
+    th { background: #B6BB79; color: white; padding: 10px 4px; font-weight: 600; text-align: center; }
+    td { padding: 8px 4px; border-bottom: 1px solid #F9D0CE; text-align: center; vertical-align: middle; }
+    .num-col { width: 40px; font-weight: 700; background: #F9F6F0; }
+    .check-col input { width: 20px; height: 20px; accent-color: #F297A0; }
+    .name-input { width: 100%; padding: 6px; border: 1px solid #B6BB79; border-radius: 10px; font-size: 0.75rem; }
+    .feedback-input { width: 100%; padding: 6px; border: 1px solid #B6BB79; border-radius: 10px; font-size: 0.75rem; }
+    
+    .add-btn {
+      background: #F297A0; color: white; border: none; padding: 8px 18px; border-radius: 30px;
+      font-size: 0.85rem; font-weight: 600; cursor: pointer; margin-top: 8px;
+      display: inline-block;
+    }
+    .delete-btn {
+      background: none; border: 1px solid #B6BB79; color: #5a5e3b; padding: 2px 8px;
+      border-radius: 20px; font-size: 0.7rem; cursor: pointer;
+    }
+    
+    .analysis-section {
+      background: white; border-radius: 20px; padding: 20px; margin-top: 20px;
+      border: 2px solid #F9D0CE;
+    }
+    .analysis-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; color: #5a5e3b; }
+    .analysis-date { font-size: 1rem; color: #F297A0; margin-bottom: 20px; font-weight: 600; }
+    .event-analysis { margin-bottom: 24px; border-bottom: 1px solid #F9D0CE; padding-bottom: 16px; }
+    .event-analysis h3 { font-size: 1.1rem; color: #5a5e3b; margin-bottom: 12px; }
+    .gen-stats { margin-left: 8px; margin-bottom: 10px; }
+    .gen-stats p { font-size: 0.85rem; margin-bottom: 3px; }
+    .total-stats { font-weight: 700; margin-top: 8px; color: #F297A0; font-size: 0.95rem; }
+    .summary-block { margin-top: 20px; }
+    .summary-item { font-size: 0.95rem; margin-bottom: 5px; }
+    
+    .footer { margin-top: 24px; text-align: right; font-size: 1.2rem; font-weight: 700; color: #F297A0; }
+    .btn-group { display: flex; gap: 12px; }
+    .reset-btn, .new-week-btn {
+      padding: 8px 20px; border-radius: 30px; font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; border: none; color: white;
+    }
+    .new-week-btn { background: #F297A0; }
+    .reset-btn { background: #B6BB79; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <h1>👥 ТРЕКЕР ПРИГЛАШЕНИЙ · ПОКОЛЕНИЯ</h1>
+    <div class="btn-group">
+      <button class="new-week-btn" id="newWeekBtn">🔄 Новая неделя</button>
+      <button class="reset-btn" id="clearBtn">🗑️ Сбросить всё</button>
+    </div>
+  </div>
+  <div class="subhead">Встреча Вт · Формула Чт · День клиента</div>
+
+  <!-- ДАТЫ -->
+  <div class="date-panel">
+    <div class="date-item">📅 Неделя: <input type="text" id="weekStart" placeholder="с ДД.ММ" style="width:100px;"> – <input type="text" id="weekEnd" placeholder="по ДД.ММ" style="width:100px;"></div>
+    <div class="date-item">💼 Встреча (Вт): <input type="text" id="tueDate" placeholder="ДД.ММ" style="width:80px;"></div>
+    <div class="date-item">🎓 Формула (Чт): <input type="text" id="thuDate" placeholder="ДД.ММ" style="width:80px;"></div>
+    <div class="date-item">🎉 День клиента: <input type="text" id="sunDate" placeholder="ДД.ММ" style="width:80px;"></div>
+  </div>
+
+  <div id="eventsContainer"></div>
+
+  <!-- АНАЛИЗ -->
+  <div class="analysis-section" id="analysisSection"></div>
+  
+  <div class="footer">Разбогатей 🚀</div>
+</div>
+
+<script>
+  (function(){
+    const STORAGE_KEY = 'sahayana_invite_tracker_v7';
+    const EVENTS = [
+      { id: 'tue', name: '💼 ВСТРЕЧА ВОЗМОЖНОСТЕЙ (Вторник)' },
+      { id: 'thu', name: '🎓 ФОРМУЛА РОСТА / АКАДЕМИЯ УСПЕХА (Четверг)' },
+      { id: 'sun', name: '🎉 ДЕНЬ КЛИЕНТА (Первое воскресенье)' }
+    ];
+    const GENERATIONS = [
+      { id: 'gen1', name: '🥇 1-е поколение' },
+      { id: 'gen2', name: '🥈 2-е поколение' },
+      { id: 'gen3', name: '🥉 3-е поколение' },
+      { id: 'new', name: '🌱 Новые (без поколения)' }
+    ];
+    
+    let data = {};
+    let dates = { weekStart: '', weekEnd: '', tueDate: '', thuDate: '', sunDate: '' };
+
+    function initData() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if(saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          data = parsed.data || {};
+          dates = parsed.dates || dates;
+        } catch(e){}
+      }
+      EVENTS.forEach(ev => {
+        if(!data[ev.id]) data[ev.id] = {};
+        GENERATIONS.forEach(gen => {
+          if(!data[ev.id][gen.id]) data[ev.id][gen.id] = [];
+        });
+      });
+      document.getElementById('weekStart').value = dates.weekStart || '';
+      document.getElementById('weekEnd').value = dates.weekEnd || '';
+      document.getElementById('tueDate').value = dates.tueDate || '';
+      document.getElementById('thuDate').value = dates.thuDate || '';
+      document.getElementById('sunDate').value = dates.sunDate || '';
+    }
+
+    function saveAll() {
+      dates.weekStart = document.getElementById('weekStart').value;
+      dates.weekEnd = document.getElementById('weekEnd').value;
+      dates.tueDate = document.getElementById('tueDate').value;
+      dates.thuDate = document.getElementById('thuDate').value;
+      dates.sunDate = document.getElementById('sunDate').value;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ data, dates }));
+      renderAnalysis();
+    }
+
+    function copyFromTue(targetEventId) {
+      GENERATIONS.forEach(gen => {
+        const sourcePeople = data['tue']?.[gen.id] || [];
+        // Копируем ТОЛЬКО ИМЕНА, статусы сбрасываем
+        const copiedPeople = sourcePeople.map(p => ({
+          name: p.name,
+          invited: false, agreed: false, thinking: false, refused: false, attended: false, noShow: false, feedback: ''
+        }));
+        data[targetEventId][gen.id] = copiedPeople;
+      });
+      saveAll(); renderEvents();
+    }
+
+    function renderEvents() {
+      let html = '';
+      EVENTS.forEach(ev => {
+        html += `<div class="event-block"><div class="event-title">${ev.name}`;
+        if(ev.id !== 'tue') {
+          html += `<button class="copy-btn" data-ev="${ev.id}">📋 Копировать имена из Встречи Вт</button>`;
+        }
+        html += `</div>`;
+        
+        GENERATIONS.forEach(gen => {
+          const people = data[ev.id][gen.id] || [];
+          html += `<div class="generation-block">`;
+          html += `<div class="generation-title">${gen.name} <span class="count-badge">${people.length} чел.</span></div>`;
+          html += `<div class="table-wrapper"><table><thead><tr>
+            <th>№</th><th>Имя</th><th>📨</th><th>👍</th><th>🤔</th><th>❌</th><th>🎥/🎉</th><th>💔</th><th>📝 Отзыв</th><th></th>
+          </tr></thead><tbody>`;
+          
+          people.forEach((p, idx) => {
+            html += `<tr data-idx="${idx}">
+              <td class="num-col">${idx+1}</td>
+              <td><input type="text" class="name-input" value="${p.name || ''}" placeholder="Имя" data-ev="${ev.id}" data-gen="${gen.id}" data-idx="${idx}" data-field="name"></td>
+              <td class="check-col"><input type="checkbox" ${p.invited ? 'checked' : ''} data-ev="${ev.id}" data-gen="${gen.id}" data-idx="${idx}" data-field="invited"></td>
+              <td class="check-col"><input type="checkbox" ${p.agreed ? 'checked' : ''} data-ev="${ev.id}" data-gen="${gen.id}" data-idx="${idx}" data-field="agreed"></td>
+              <td class="check-col"><input type="checkbox" ${p.thinking ? 'checked' : ''} data-ev="${ev.id}" data-gen="${gen.id}" data-idx="${idx}" data-field="thinking"></td>
+              <td class="check-col"><input type="checkbox" ${p.refused ? 'checked' : ''} data-ev="${ev.id}" data-gen="${gen.id}" data-idx="${idx}" data-field="refused"></td>
+              <td class="check-col"><input type="checkbox" ${p.attended ? 'checked' : ''} data-ev="${ev.id}" data-gen="${gen.id}" data-idx="${idx}" data-field="attended"></td>
+              <td class="check-col"><input type="checkbox" ${p.noShow ? 'checked' : ''} data-ev="${ev.id}" data-gen="${gen.id}" data-idx="${idx}" data-field="noShow"></td>
+              <td><input type="text" class="feedback-input" value="${p.feedback || ''}" placeholder="Отзыв" data-ev="${ev.id}" data-gen="${gen.id}" data-idx="${idx}" data-field="feedback"></td>
+              <td><button class="delete-btn" data-ev="${ev.id}" data-gen="${gen.id}" data-idx="${idx}">✕</button></td>
+            </tr>`;
+          });
+          
+          html += `</tbody></table></div>`;
+          html += `<button class="add-btn" data-ev="${ev.id}" data-gen="${gen.id}">➕ Добавить человека</button>`;
+          html += `</div>`;
+        });
+        html += `</div>`;
+      });
+      document.getElementById('eventsContainer').innerHTML = html;
+      renderAnalysis();
+    }
+
+    function addPerson(evId, genId) {
+      if(!data[evId]) data[evId] = {};
+      if(!data[evId][genId]) data[evId][genId] = [];
+      data[evId][genId].push({ name: '', invited: false, agreed: false, thinking: false, refused: false, attended: false, noShow: false, feedback: '' });
+      saveAll(); renderEvents();
+    }
+
+    function deletePerson(evId, genId, idx) {
+      data[evId][genId].splice(idx, 1);
+      saveAll(); renderEvents();
+    }
+
+    function updateField(evId, genId, idx, field, value) {
+      if(!data[evId][genId][idx]) return;
+      if(field === 'name' || field === 'feedback') data[evId][genId][idx][field] = value;
+      else data[evId][genId][idx][field] = value === true;
+      saveAll(); renderAnalysis();
+    }
+
+    function resetForNewWeek() {
+      EVENTS.forEach(ev => {
+        GENERATIONS.forEach(gen => {
+          const people = data[ev.id][gen.id] || [];
+          people.forEach(p => {
+            p.invited = false; p.agreed = false; p.thinking = false;
+            p.refused = false; p.attended = false; p.noShow = false; p.feedback = '';
+          });
+        });
+      });
+      dates = { weekStart: '', weekEnd: '', tueDate: '', thuDate: '', sunDate: '' };
+      saveAll(); renderEvents();
+      document.getElementById('weekStart').value = '';
+      document.getElementById('weekEnd').value = '';
+      document.getElementById('tueDate').value = '';
+      document.getElementById('thuDate').value = '';
+      document.getElementById('sunDate').value = '';
+    }
+
+    function renderAnalysis() {
+      const stats = {};
+      EVENTS.forEach(ev => { stats[ev.id] = {}; });
+      
+      EVENTS.forEach(ev => {
+        GENERATIONS.forEach(gen => {
+          const people = data[ev.id]?.[gen.id] || [];
+          let invited = 0, agreed = 0, thinking = 0, refused = 0, attended = 0, noShow = 0;
+          people.forEach(p => {
+            if(p.invited) invited++;
+            if(p.agreed) agreed++;
+            if(p.thinking) thinking++;
+            if(p.refused) refused++;
+            if(p.attended) attended++;
+            if(p.noShow) noShow++;
+          });
+          stats[ev.id][gen.id] = { invited, agreed, thinking, refused, attended, noShow };
+        });
+      });
+      
+      let html = `<div class="analysis-title">📊 АНАЛИЗ ЗА НЕДЕЛЮ</div>`;
+      html += `<div class="analysis-date">📅 ${dates.weekStart || '_____'} – ${dates.weekEnd || '_____'}</div>`;
+      
+      EVENTS.forEach(ev => {
+        const evDate = ev.id === 'tue' ? dates.tueDate : (ev.id === 'thu' ? dates.thuDate : dates.sunDate);
+        html += `<div class="event-analysis">`;
+        html += `<h3>${ev.name} ${evDate ? '('+evDate+')' : ''}</h3>`;
+        
+        let totalInv = 0, totalAgr = 0, totalTh = 0, totalRef = 0, totalAtt = 0, totalNS = 0;
+        GENERATIONS.forEach(gen => {
+          const s = stats[ev.id][gen.id];
+          totalInv += s.invited; totalAgr += s.agreed; totalTh += s.thinking;
+          totalRef += s.refused; totalAtt += s.attended; totalNS += s.noShow;
+          
+          const conv = s.invited > 0 ? ((s.attended / s.invited) * 100).toFixed(0) : '0';
+          html += `<div class="gen-stats">`;
+          html += `<p><strong>${gen.name}:</strong> 📨${s.invited} 👍${s.agreed} 🤔${s.thinking} ❌${s.refused} 🎥${s.attended} 💔${s.noShow} | 📈 ${conv}%</p>`;
+          html += `</div>`;
+        });
+        const totalConv = totalInv > 0 ? ((totalAtt / totalInv) * 100).toFixed(0) : '0';
+        html += `<p class="total-stats">💼 ИТОГО: 📨${totalInv} 👍${totalAgr} 🤔${totalTh} ❌${totalRef} 🎥${totalAtt} 💔${totalNS} (${totalConv}%)</p>`;
+        html += `</div>`;
+      });
+      
+      html += `<div class="summary-block">`;
+      html += `<div class="analysis-title" style="font-size:1.1rem;">👑 ПО ПОКОЛЕНИЯМ</div>`;
+      GENERATIONS.forEach(gen => {
+        const tue = stats['tue']?.[gen.id]?.attended || 0;
+        const thu = stats['thu']?.[gen.id]?.attended || 0;
+        const sun = stats['sun']?.[gen.id]?.attended || 0;
+        html += `<p class="summary-item">${gen.name}: 💼${tue} 🎓${thu} 🎉${sun}</p>`;
+      });
+      html += `</div>`;
+      
+      document.getElementById('analysisSection').innerHTML = html;
+    }
+
+    function attachEvents() {
+      document.addEventListener('click', (e) => {
+        if(e.target.classList.contains('add-btn')) {
+          addPerson(e.target.dataset.ev, e.target.dataset.gen);
+        } else if(e.target.classList.contains('delete-btn')) {
+          deletePerson(e.target.dataset.ev, e.target.dataset.gen, parseInt(e.target.dataset.idx));
+        } else if(e.target.classList.contains('copy-btn')) {
+          if(confirm('Скопировать имена из Встречи Вт? Текущие данные будут заменены.')) {
+            copyFromTue(e.target.dataset.ev);
+          }
+        }
+      });
+      
+      document.addEventListener('change', (e) => {
+        const t = e.target;
+        if(t.dataset.ev && t.dataset.gen && t.dataset.idx !== undefined) {
+          const field = t.dataset.field;
+          const value = t.type === 'checkbox' ? t.checked : t.value;
+          updateField(t.dataset.ev, t.dataset.gen, parseInt(t.dataset.idx), field, value);
+        }
+      });
+      
+      document.addEventListener('input', (e) => {
+        const t = e.target;
+        if(t.classList.contains('name-input') || t.classList.contains('feedback-input')) {
+          if(t.dataset.ev && t.dataset.gen && t.dataset.idx !== undefined) {
+            updateField(t.dataset.ev, t.dataset.gen, parseInt(t.dataset.idx), t.dataset.field, t.value);
+          }
+        }
+        if(t.id === 'weekStart' || t.id === 'weekEnd' || t.id === 'tueDate' || t.id === 'thuDate' || t.id === 'sunDate') {
+          saveAll();
+        }
+      });
+      
+      document.getElementById('newWeekBtn').addEventListener('click', ()=>{
+        if(confirm('Начать новую неделю? Все галочки и даты сбросятся, но имена останутся.')) {
+          resetForNewWeek();
+        }
+      });
+      
+      document.getElementById('clearBtn').addEventListener('click', ()=>{
+        if(confirm('Удалить ВСЕ данные? Имена тоже пропадут!')) {
+          localStorage.removeItem(STORAGE_KEY);
+          location.reload();
+        }
+      });
+    }
+
+    initData();
+    renderEvents();
+    attachEvents();
+  })();
+</script>
+</body>
+</html>
